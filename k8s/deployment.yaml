@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sherpany-app-deployment
+  namespace: sherpany-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sherpany-app
+  template:
+    metadata:
+      labels:
+        app: sherpany-app
+    spec:
+      containers:
+      - name: sherpany-app
+        image: baduker/sherpany:latest
+        ports:
+          - containerPort: 8080
+        envFrom:
+          - secretRef:
+              name: sherpany-db-envs
+        env:
+          - name: SSL_ROOT_CERT
+            value: "/certs/eu-central-1-bundle.pem"
+        volumeMounts:
+          - name: ssl-root-cert
+            mountPath: /certs
+            readOnly: true
+        resources:
+            requests:
+                memory: "128Mi"
+                cpu: "250m"
+            limits:
+                memory: "256Mi"
+                cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: ssl-root-cert
+        configMap:
+          name: ssl-root-cert

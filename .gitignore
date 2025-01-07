@@ -1,0 +1,9 @@
+.idea/
+
+./k8s/access-key
+./k8s/secret-access-key
+
+/terraform/.terraform/*
+/terraform/terraform.tfstate
+
+.DS_Store
